@@ -1,6 +1,8 @@
 from urllib.parse import quote_plus as quote
-import requests
 from typing import NamedTuple
+
+import requests
+from lxml import etree
 
 
 class Book(NamedTuple):
@@ -35,14 +37,21 @@ class MyBookSource(Source):
         headers = {
             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36',
         }
-        url_template = f'https://mybook.ru/search/?q={quote(book_title)}'
+        url_template = f'https://mybook.ru/search/books/?q={quote(book_title)}'
         response = requests.get(url_template, headers=headers)
         html = response.text
 
         def parse_books(_html) -> list[type[Book]]:
-            pass
+            _books = list()
+            tree = etree.fromstring(_html, etree.HTMLParser())
+            elements = tree.xpath('//h1/../div/div[./div/div/a/p]')
+            for element in elements:
+                book_title = element.xpath('./div/a/p/text()')[0]
+                book_url = element.xpath('./div/a/@href')[0]
+                _books.append(Book(book_title, book_url))
+            return _books
 
-        books = parse_books(html)
+        cls.books = parse_books(html)
 
 
 

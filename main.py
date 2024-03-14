@@ -1,4 +1,5 @@
 from quart import Quart, render_template, websocket
+from books.book import MyBookSource
 
 app = Quart(__name__)
 
@@ -17,8 +18,14 @@ async def json():
 async def ws():
     while True:
         data = await websocket.receive()
-        await websocket.send(f"hello {data}")
-        await websocket.send_json({"hello": data})
+        MyBookSource.search_by_title(data)
+        books = MyBookSource.books
+        #  await websocket.send(f"hello {data}")
+        await websocket.send_json({"books": books})
+        #  await websocket.send_json({"books": [
+        #      ('Пикник на обочине', 'https://asdf.com/'),
+        #      ('Преступление и наказание', 'https://sfajfjfjff.com/'),
+        #  ]})
 
 if __name__ == "__main__":
     app.run()
