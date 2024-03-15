@@ -19,9 +19,9 @@ async def ws():
     while True:
         data = await websocket.receive()
         MyBookSource.search_by_title(data)
-        books = MyBookSource.books
+        books = {"books": MyBookSource.books}
         #  await websocket.send(f"hello {data}")
-        await websocket.send_json({"books": books})
+        await websocket.send_json(books)
         #  await websocket.send_json({"books": [
         #      ('Пикник на обочине', 'https://asdf.com/'),
         #      ('Преступление и наказание', 'https://sfajfjfjff.com/'),
